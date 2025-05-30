@@ -8,15 +8,16 @@ module.exports = {
   entry: "./src/index.js",
   output: {
     // 当我们把生成后的bundle.js文件写入html的时候，需要添加的前缀
-    publicPath: "http://localhost:3000/",
+    publicPath: "http://localhost:8000/",
   },
   devServer: {
-    port: 3000
+    port: 8000
   },
   module: {
     rules: [
       {
         test: /\.js$/,
+        exclude: /node_modules/,
         use: [
           {
             loader: 'babel-loader',
@@ -40,10 +41,13 @@ module.exports = {
       template: "./src/index.html"
     }),
     new ModuleFederationPlugin({
-      filename: 'remoteEntry.js',
-      name: 'remote',
-      exposes: { // 要向外暴露的组件
-        './NewsList': './src/NewsList' // remote/NewsList
+      // filename: 'remoteEntry.js',
+      // name: 'remote',
+      // exposes: { // 要向外暴露的组件
+      //   './NewsList': './src/NewsList' // remote/NewsList
+      // }
+      remotes: {
+        remote: 'remote@http://localhost:3000/remoteEntry.js'
       }
     })
   ]

@@ -9,6 +9,9 @@ module.exports = {
   output: {
     // 当我们把生成后的bundle.js文件写入html的时候，需要添加的前缀
     publicPath: "http://localhost:3000/",
+    // false不使用异步加载
+    chunkLoading: 'jsonp',
+    clean: true
   },
   devServer: {
     port: 3000
@@ -17,6 +20,7 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
+        exclude: /node_modules/,
         use: [
           {
             loader: 'babel-loader',
@@ -43,7 +47,8 @@ module.exports = {
       filename: 'remoteEntry.js',
       name: 'remote',
       exposes: { // 要向外暴露的组件
-        './NewsList': './src/NewsList' // remote/NewsList
+        './NewsList': './src/NewsList', // remote/NewsList
+        './click': './src/click'
       }
     })
   ]
