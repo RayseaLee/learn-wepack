@@ -1,0 +1,14 @@
+#####
+.tea/
+.idea
+.vscode
+.project
+*/.DS_Store
+dist/*
+node_modules
+host/node_modules
+host/dist
+remote/node_modules
+remote/dist
+package-lock.json
+release
