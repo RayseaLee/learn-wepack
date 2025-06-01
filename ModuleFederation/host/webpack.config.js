@@ -26,7 +26,7 @@ module.exports = {
                 [
                   '@babel/preset-react',
                   {// 如果想手动引入react 用classic（默认），不想的话用automatic
-                    "runtime": 'automatic'
+                    "runtime": 'classic'
                   }
                 ]
               ]
@@ -41,14 +41,18 @@ module.exports = {
       template: "./src/index.html"
     }),
     new ModuleFederationPlugin({
-      // filename: 'remoteEntry.js',
-      // name: 'remote',
-      // exposes: { // 要向外暴露的组件
-      //   './NewsList': './src/NewsList' // remote/NewsList
-      // }
+      filename: 'remoteEntry.js',
+      name: 'host',
+      exposes: { // 要向外暴露的组件
+        './Sliders': './src/Sliders.js' // remote/Sliders
+      },
       remotes: {
         remote: 'remote@http://localhost:3000/remoteEntry.js'
-      }
+      },
+      // shared: {
+      //   react: { singleton: true, requiredVersion: '19.1.0' },
+      //   'react-dom': { singleton: true, requiredVersion: '19.1.0' },
+      // }
     })
   ]
 };
