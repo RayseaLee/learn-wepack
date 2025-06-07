@@ -4,7 +4,7 @@
 .vscode
 .project
 */.DS_Store
-dist/*
+dist
 node_modules
 package-lock.json
 release
