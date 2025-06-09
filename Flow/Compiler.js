@@ -21,11 +21,11 @@ class Compiler {
     this.hooks.run.call();
     const onCompiled = (err, stats, fileDependencies) => { 
       callback(err, {
-        toJson() => stats
+        toJson: () => stats
       });
       // fileDependencies 指的是本次打包涉及哪些文件
       // 监听这些文件的变化，当文件发生变化，重新开启一个新的编译
-      fileDependencies.forEach(file => {
+      [...fileDependencies].forEach(file => {
         fs.watch(file, () => this.compile(onCompiled))
       });
     };
