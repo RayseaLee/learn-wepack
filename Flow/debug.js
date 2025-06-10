@@ -13,6 +13,5 @@ compiler.run((err, stats) => {
       assets: true, // 输出的文件列表
     })
   )
-  console.log(statsString);
   fs.writeFileSync(path.resolve(__dirname, 'myStats.json'), statsString);
 });

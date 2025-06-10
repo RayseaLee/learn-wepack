@@ -14,6 +14,8 @@ class Complication {
     this.options.context = this.options.context || toUnixSeq(process.cwd()); // current working directory
     this.fileDependencies = new Set();
     this.modules = []; // 本次编译所有的模块
+    this.chunks = []; // 存放所有的代码块
+    this.assets = {}; // 存放输出的文件 key: 文件名, value: 文件内容
   }
   build(onCompiled) {
     // webpackFlow: 5.根据配置中的entry找出入口文件
@@ -29,8 +31,30 @@ class Complication {
       // 把此文件添加到文件依赖列表中
       this.fileDependencies.add(entryFilePath);
       // 从入口文件出发，开始编译模块
-      this.buildModule(entryName, entryFilePath);
+      let entryModule = this.buildModule(entryName, entryFilePath);
+      // webpackFlow: 8.根据入口和模块之间的依赖关系，组装成一个个包含多个模块的chunk
+      let chunk = {
+        name: entryName, // 入口名称
+        entryModule, // 入口模块
+        modules: this.modules.filter(module => module.names.includes(entryName)) // 此入口依赖的模块
+      };
+      this.chunks.push(chunk);
     }
+    // webpackFlow: 9.再把每个 Chunk 转换成一个单独的文件加入到输出列表
+    this.chunks.forEach(chunk => {
+      let outputFileName = this.options.output.filename.replace('[name]', chunk.name)
+      this.assets[outputFileName] = getSouceCode(chunk);
+    })
+    // 最后执行编译完成回调
+    onCompiled(
+      null,
+      {
+        modules: this.modules,
+        chunks: this.chunks,
+        assets: this.assets
+      },
+      this.fileDependencies
+    )
     console.log('this.modules',this.modules);
   }
   buildModule(entryName, modulePath) {
@@ -96,9 +120,41 @@ class Complication {
         this.buildModule(entryName, depModulePath);
       }
     })
-    console.log(module);
     return module;
   }
+}
+
+function getSouceCode(chunk) {
+  return `
+    (() => {
+      var __webpack_modules__ = {
+        ${
+          chunk.modules
+          .filter(module => module.id !== chunk.entryModule.id)
+          .map(module => 
+            `"${module.id}": module => {
+              ${module._source}
+            }`
+          )
+        }
+      };
+      var __webpack_module_cache__ = {};
+      function __webpack_require__(moduleId) {
+        var cachedModule = __webpack_module_cache__[moduleId];
+        if (cachedModule !== undefined) {
+          return cachedModule.exports;
+        }
+        var module = (__webpack_module_cache__[moduleId] = {
+          exports: {},
+        });
+        __webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+        return module.exports;
+      }
+      (() => {
+        ${chunk.entryModule._source}
+      })();
+    })();
+  `
 }
 
 // 添加文件后缀名

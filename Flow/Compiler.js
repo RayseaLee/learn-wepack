@@ -19,7 +19,13 @@ class Compiler {
   // run方法，接收一个回调函数callback
   run(callback) {
     this.hooks.run.call();
-    const onCompiled = (err, stats, fileDependencies) => { 
+    const onCompiled = (err, stats, fileDependencies) => {
+      // webpackFlow: 10.在确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统
+      const { assets } = stats;
+      for (let filename in assets) {
+        const filePath = path.posix.join(this.options.output.path, filename);
+        fs.writeFileSync(filePath, assets[filename], 'utf-8')
+      }
       callback(err, {
         toJson: () => stats
       });
