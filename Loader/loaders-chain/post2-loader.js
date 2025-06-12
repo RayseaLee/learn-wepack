@@ -1,5 +1,5 @@
 function loader(source) {
-  console.log('post2');
+  console.log('post2-loader');
   return source + '//post2';
 }
 loader.pitch = function () {

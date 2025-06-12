@@ -1,5 +1,5 @@
 function loader(source) {
-  console.log('inline2');
+  console.log('inline2-loader');
   return source + '//inline2';
 }
 loader.pitch = function () {

@@ -1,5 +1,5 @@
 function loader(source) {
-  console.log('pre1');
+  console.log('pre1-loader');
   return source + '//pre1';
 }
 loader.pitch = function () {

@@ -1,5 +1,5 @@
 // 引入 loader-runner 模块中的 runLoaders 函数
-const { runLoaders }  = require('loader-runner');
+const { runLoaders }  = require('./loader-runner');
 // 引入 path 模块
 const path = require('path');
 // 引入 fs 模块
@@ -77,11 +77,12 @@ runLoaders({
   // 需要执行的 loader 列表
   loaders: resolvedLoaders,
   // 上下文对象
-  context: {},
+  context: { age: 18 },
   // 读取资源的函数，这里使用 fs.readFile 函数
   readResource: fs.readFile.bind(fs)
 }, (err, result) => {
   // 打印错误和处理结果
   console.log('err:', err);
-  console.log('result:', result);
+  console.log('result:', result.result[0].toString());
+  console.log('resourceBuffer:', result.resourceBuffer ? result.resourceBuffer.toString() : '');
 });
