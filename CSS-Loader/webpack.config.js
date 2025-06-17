@@ -18,13 +18,18 @@ module.exports = {
             loader: path.resolve('./loaders/style-loader')
           },
           {
-            // loader: 'css-loader',
-            loader: path.resolve('./loaders/css-loader'),
+            loader: 'css-loader',
+            // loader: path.resolve('./loaders/css-loader'),
             options: {
-              esModule: true
+              esModule: false,
+              url: true
             }
           }
         ]
+      },
+      {
+        test: /\.png$/,
+        type: 'asset/resource'
       }
     ]
   },
