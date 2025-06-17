@@ -6,11 +6,31 @@ function getImportCode(imports) {
   return code;
 }
 
+function getModuleCode(result) {
+  const code = JSON.stringify(result);
+  const beforeCode = `var cssLoaderExport = cssLoaderApiImport(cssLoaderApiNoSourcemapImport);\r\n`
+  return `${beforeCode}cssLoaderExport.push([module.id, ${code}, ""]);\r\n`;
+}
+
+function getExportCode(options) {
+  return `${options.esModule ? 'export default' : 'module.exports ='} cssLoaderExport;`;
+}
+
+/**
+ * 用于把请求字符串（一般是绝对路径）变成相对于当前正在转换模块的相对路径
+ * @param {*} imports 
+ */
 function stringifyRequest(loaderContext, request) {
+  // contextify是新的方法，用来计算相对路径
+  // loaderContext.context 当前正在转换的模块的绝对路径
+  // loaderContext.context=D:\code\learn\webpack\CSS-Loader\src
+  // request=D:\code\learn\webpack\CSS-Loader\loaders\css-loader\runtime\api.js
   return JSON.stringify(loaderContext.utils.contextify(loaderContext.context, request)) 
 }
 
 module.exports = {
   getImportCode,
-  stringifyRequest
+  getModuleCode,
+  getExportCode,
+  stringifyRequest,
 }

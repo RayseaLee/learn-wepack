@@ -15,10 +15,13 @@ module.exports = {
         test: /\.css$/,
         use: [
           {
+            loader: path.resolve('./loaders/style-loader')
+          },
+          {
             // loader: 'css-loader',
             loader: path.resolve('./loaders/css-loader'),
             options: {
-              esModule: false
+              esModule: true
             }
           }
         ]

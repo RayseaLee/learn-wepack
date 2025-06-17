@@ -1,6 +1,11 @@
-const { getImportCode, stringifyRequest } = require('./utils');
+const { getImportCode, stringifyRequest, getModuleCode, getExportCode } = require('./utils');
+/**
+ * css-loader
+ * @param {*} content css代码
+ */
 function loader(content) {
   const callback = this.async();
+  const options = this.getOptions();
   const imports = [
     {
       importName: 'cssLoaderApiNoSourcemapImport',
@@ -12,8 +17,8 @@ function loader(content) {
     }
   ];
   const importCode = getImportCode(imports);
-  const moduleCode = '';
-  const exportCode = '';
+  const moduleCode = getModuleCode({ css: content });
+  const exportCode = getExportCode(options);
   callback(null, `${importCode}${moduleCode}${exportCode}`);
 }
 
