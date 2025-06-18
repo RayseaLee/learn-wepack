@@ -1,5 +1,5 @@
 body {
   color: red;
-  background-image: url('../loaders/css-loader&style-loader.png');
+  background-image: url('./images/css-loader&style-loader.png');
   background-repeat: no-repeat;
 }
