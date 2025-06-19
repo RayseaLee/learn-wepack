@@ -6,9 +6,12 @@ function getImportCode(imports) {
   return code;
 }
 
-function getModuleCode(result, replacements) {
+function getModuleCode(result, api, replacements) {
   let code = JSON.stringify(result.css);
   let beforeCode = `var cssLoaderExport = cssLoaderApiImport(cssLoaderApiNoSourcemapImport);\r\n`
+  for (const item of api) {
+    beforeCode += `cssLoaderExport.i(${item.importName});\r\n`
+  }
   for (const item of replacements) {
     const { importName, replacementName } = item;
     beforeCode += `var ${replacementName} = cssLoaderGetUrlImport(${importName});\r\n`

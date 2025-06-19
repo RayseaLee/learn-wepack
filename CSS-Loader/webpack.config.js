@@ -22,7 +22,8 @@ module.exports = {
             loader: path.resolve('./loaders/css-loader'),
             options: {
               esModule: false,
-              url: true
+              url: true,
+              import: true
             }
           }
         ]

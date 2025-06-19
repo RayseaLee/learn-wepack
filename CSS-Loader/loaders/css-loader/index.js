@@ -1,6 +1,7 @@
 const { getImportCode, stringifyRequest, getModuleCode, getExportCode } = require('./utils');
 const postcss = require('postcss');
 const urlParser = require('./plugins/postcss-url-parser');
+const importParser = require('./plugins/postcss-import-parser');
 /**
  * css-loader
  * @param {*} content css代码
@@ -10,8 +11,20 @@ function loader(content) {
   const options = this.getOptions();
   const plugins = [];
   const replacements = [];
-  // 定义要导出的模块及别名
+  // 定义通过url要导入的模块及别名
   const urlPluginImports = [];
+  // 定义通过import导入引入的模块
+  const importPluginImports = [];
+  // 存放将来要调用i方法的模块
+  const importPluginApi = [];
+  if (options.import) {
+    plugins.push(importParser({
+      imports: importPluginImports,
+      loaderContext: this,
+      urlHandler: (url) => stringifyRequest(this, url),
+      api: importPluginApi
+    }))
+  }
   if (options.url) {
     plugins.push(urlParser({
       imports: urlPluginImports,
@@ -33,9 +46,9 @@ function loader(content) {
           url: stringifyRequest(this, require.resolve('./runtime/api.js'))
         }
       ];
-      imports.push(...urlPluginImports);
+      imports.push(...importPluginImports, ...urlPluginImports);
       const importCode = getImportCode(imports);
-      const moduleCode = getModuleCode(result, replacements);
+      const moduleCode = getModuleCode(result, importPluginApi, replacements);
       const exportCode = getExportCode(options);
       callback(null, `${importCode}${moduleCode}${exportCode}`);
     })
