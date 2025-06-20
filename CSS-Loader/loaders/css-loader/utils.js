@@ -39,9 +39,27 @@ function stringifyRequest(loaderContext, request) {
   return JSON.stringify(loaderContext.utils.contextify(loaderContext.context, request)) 
 }
 
+// 合并请求
+function combineLoaders(preRequest, request) {
+  return preRequest + request;
+}
+
+// 获取要执行几个loader
+// loaders：所有的loader loaderIndex：当前正在执行的loader的索引 importLoaders：是用户配置的要执行的loader数
+function getPreRequester({ loaders, loaderIndex }, { importLoaders = 0 }) {
+  const loaderRequest = loaders
+  .slice(loaderIndex, loaderIndex + importLoaders + 1)
+  .map(n => n.request)
+  .join('!');
+  // 只要行内loader
+  return `!!${loaderRequest}!`
+}
+
 module.exports = {
   getImportCode,
   getModuleCode,
   getExportCode,
   stringifyRequest,
+  combineLoaders,
+  getPreRequester
 }

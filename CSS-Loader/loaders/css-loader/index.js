@@ -1,4 +1,4 @@
-const { getImportCode, stringifyRequest, getModuleCode, getExportCode } = require('./utils');
+const { getImportCode, stringifyRequest, getModuleCode, getExportCode, combineLoaders, getPreRequester } = require('./utils');
 const postcss = require('postcss');
 const urlParser = require('./plugins/postcss-url-parser');
 const importParser = require('./plugins/postcss-import-parser');
@@ -21,7 +21,12 @@ function loader(content) {
     plugins.push(importParser({
       imports: importPluginImports,
       loaderContext: this,
-      urlHandler: (url) => stringifyRequest(this, url),
+      urlHandler: (url) => stringifyRequest(this,
+        combineLoaders(
+          getPreRequester(this, options),
+          url
+        )
+      ),
       api: importPluginApi
     }))
   }
@@ -35,7 +40,6 @@ function loader(content) {
   postcss(plugins)
     .process(content, { from: this.resourcePath, to: this.resourcePath })
     .then((result) => {
-      console.log('result.css', result.css);
       const imports = [
         {
           importName: 'cssLoaderApiNoSourcemapImport',

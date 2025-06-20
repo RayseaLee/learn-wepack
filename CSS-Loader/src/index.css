@@ -2,6 +2,6 @@
 
 body {
   color: red;
-  background-image: url('./images/css-loader&style-loader.png');
-  background-repeat: no-repeat;
+  /* background-image: url('./images/css-loader&style-loader.png');
+  background-repeat: no-repeat; */
 }

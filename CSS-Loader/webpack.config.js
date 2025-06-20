@@ -23,9 +23,12 @@ module.exports = {
             options: {
               esModule: false,
               url: true,
-              import: true
+              import: true,
+              // 在处理包含（import）的css之前要执行几个前置loader
+              importLoaders: 0
             }
-          }
+          },
+          path.resolve(__dirname, './loaders/logger-loader')
         ]
       },
       {

@@ -10,5 +10,12 @@ module.exports = cssWithMappingToString => {
           return content;
       }).join("\r\n");
     };
+
+    list.i = function i(modules) {
+      console.log(modules);
+      if (modules.length) {
+        return list.push(...modules)
+      }
+    }
   return list;
 };
