@@ -2,6 +2,10 @@ const valueParser = require('postcss-value-parser');
 const { stringifyRequest } = require('../utils');
 const loader = require('..');
 
+// 通过解析器实现语法无关的路径提取，确保插件能处理所有合法的 @import 格式。
+// @import "basic.css";         /* 直接字符串 */
+// @import url('basic.css');    /* url() 函数 */
+// @import url(basic.css);      /* 无引号的 url */
 function parseNode(atRule) { 
   const params = atRule.params; // "basic.css"
   const valueNode = valueParser(params);
