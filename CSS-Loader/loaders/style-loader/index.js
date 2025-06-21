@@ -17,6 +17,7 @@ loader.pitch = function (remainingRequest) {
     let element = document.createElement('style');
     element.innerHTML = content.toString();
     document.head.appendChild(element);
+    module.exports = content;
   `
   return contentCode
 }

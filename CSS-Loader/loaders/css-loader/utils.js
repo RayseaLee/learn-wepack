@@ -1,3 +1,5 @@
+const postcssModulesScope = require('./plugins/postcss-modules-scope')
+
 function getImportCode(imports) {
   let code = '';
   for(item of imports) {
@@ -23,8 +25,28 @@ function getModuleCode(result, api, replacements) {
   return `${beforeCode}cssLoaderExport.push([module.id, ${code}, ""]);\r\n`;
 }
 
-function getExportCode(options) {
-  return `${options.esModule ? 'export default' : 'module.exports ='} cssLoaderExport;`;
+function getExportCode(exports, options) {
+  let code = '';
+  let localsCode = '';
+  function addExportToLocalsCode(name, value) {
+    if (localsCode) {
+      localsCode += ',\n';
+    }
+    localsCode += `${JSON.stringify(name)}: ${JSON.stringify(value)}`;
+  }
+  for (const { name, value } of exports) {
+    addExportToLocalsCode(name, value);
+  }
+  if (options.modules.exportOnlyLocals) {
+    return `${options.esModule ? 'export default' : 'module.exports ='} {\n
+      ${localsCode}\n
+    };\n;`
+  }
+  code += `cssLoaderExport.locals = {\n
+    ${localsCode}\n
+  };\n`;
+  code += `${options.esModule ? 'export default' : 'module.exports ='} cssLoaderExport;`;
+  return code;
 }
 
 /**
@@ -55,11 +77,18 @@ function getPreRequester({ loaders, loaderIndex }, { importLoaders = 0 }) {
   return `!!${loaderRequest}!`
 }
 
+function getModulesPlugins(loaderContext) {
+  let plugins = [postcssModulesScope({ loaderContext })];
+  return plugins;
+}
+
+
 module.exports = {
   getImportCode,
   getModuleCode,
   getExportCode,
   stringifyRequest,
   combineLoaders,
-  getPreRequester
+  getPreRequester,
+  getModulesPlugins
 }

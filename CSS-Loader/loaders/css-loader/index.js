@@ -1,7 +1,8 @@
-const { getImportCode, stringifyRequest, getModuleCode, getExportCode, combineLoaders, getPreRequester } = require('./utils');
+const { getImportCode, stringifyRequest, getModuleCode, getExportCode, combineLoaders, getPreRequester, getModulesPlugins } = require('./utils');
 const postcss = require('postcss');
 const urlParser = require('./plugins/postcss-url-parser');
 const importParser = require('./plugins/postcss-import-parser');
+const icssParser = require('./plugins/postcss-icss-parser');
 /**
  * css-loader
  * @param {*} content css代码
@@ -11,8 +12,13 @@ function loader(content) {
   const options = this.getOptions();
   const plugins = [];
   const replacements = [];
-  // 定义通过url要导入的模块及别名
-  const urlPluginImports = [];
+  const exports = [];
+  if (options.modules) {
+    plugins.push(...getModulesPlugins(this));
+    plugins.push(icssParser({
+      exports
+    }))
+  }
   // 定义通过import导入引入的模块
   const importPluginImports = [];
   // 存放将来要调用i方法的模块
@@ -30,6 +36,8 @@ function loader(content) {
       api: importPluginApi
     }))
   }
+  // 定义通过url要导入的模块及别名
+  const urlPluginImports = [];
   if (options.url) {
     plugins.push(urlParser({
       imports: urlPluginImports,
@@ -53,7 +61,7 @@ function loader(content) {
       imports.push(...importPluginImports, ...urlPluginImports);
       const importCode = getImportCode(imports);
       const moduleCode = getModuleCode(result, importPluginApi, replacements);
-      const exportCode = getExportCode(options);
+      const exportCode = getExportCode(exports, options);
       callback(null, `${importCode}${moduleCode}${exportCode}`);
     })
 }

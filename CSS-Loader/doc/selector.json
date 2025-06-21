@@ -1,0 +1,25 @@
+{
+    "nodes": [
+        {
+            "nodes": [
+                {
+                    "value": ":local",
+                    "nodes": [
+                        {
+                            "nodes": [
+                                {
+                                    "value": "background",
+                                    "type": "class"
+                                }
+                            ],
+                            "type": "selector"
+                        }
+                    ],
+                    "type": "pseudo"
+                }
+            ],
+            "type": "selector"
+        }
+    ],
+    "type": "root"
+}
