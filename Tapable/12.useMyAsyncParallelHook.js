@@ -1,4 +1,4 @@
-const { AsyncParallelHook } = require('tapable');
+const { AsyncParallelHook } = require('./tapable');
 const hook = new AsyncParallelHook(['name', 'age']);
 
 console.time('cost');
@@ -27,7 +27,3 @@ hook.tapAsync('3', (name, age, callback) => {
 hook.callAsync('RayseaLee', 24, () => {
   console.timeEnd('cost');
 });
-// 1 RayseaLee 24
-// 2 RayseaLee 24
-// 3 RayseaLee 24
-// cost: 3.003s

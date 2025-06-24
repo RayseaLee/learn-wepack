@@ -8,6 +8,8 @@ class Hook {
     // 此变量刚开始是没有值的，后面会设置为回调函数的数组
     this._x = undefined; // this.taps.map(item => item.fn)
     this.call = CALL_DELEGATE;
+    this.callAsync = CALL_ASYNC_DELEGATE;
+    this.promise = PROMISE_DELEGATE;
   }
 
   /**
@@ -18,6 +20,12 @@ class Hook {
   tap(options, fn) {
     // 用 tap 注册的就是 sync 类型的tapInfo
     this._tap('sync', options, fn)
+  }
+  tapAsync(options, fn) {
+    this._tap('async', options, fn)
+  }
+  tapPromise(options, fn) {
+    this._tap('promise', options, fn)
   }
   _tap(type, options, fn) {
     if (typeof options === 'string') {
@@ -50,6 +58,18 @@ const CALL_DELEGATE = function(...args) {
   this.call = this._createCall('sync');
   // 返回this.call的结果
   return this.call(...args)
+}
+const CALL_ASYNC_DELEGATE = function(...args) {
+  // 动态编译出来一个函数赋给this.callAsync new Function()
+  this.callAsync = this._createCall('async');
+  // 返回this.callAsync的结果
+  return this.callAsync(...args)
+}
+const PROMISE_DELEGATE = function(...args) {
+  // 动态编译出来一个函数赋给this.promise new Function()
+  this.promise = this._createCall('promise');
+  // 返回this.promise的结果
+  return this.promise(...args)
 }
 
 module.exports = Hook;

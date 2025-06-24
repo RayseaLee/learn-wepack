@@ -13,9 +13,20 @@ class HookCodeFactory {
     // 把选项对象保存到工厂的options属性上
     this.options = options;
   }
-  args() {
-    // 获取参数列表
-    return this.options.args.join(', ');
+  // 获取参数列表
+  args(options = {}) {
+    let allArgs = this.options.args;
+    const { before, after } = options;
+    if (before) {
+      allArgs = [before, ...allArgs]
+    }
+    if (after) {
+      allArgs = [...allArgs, after]
+    }
+    if (allArgs.length > 0) {
+      return allArgs.join(', ');
+    }
+    return '';
   }
   header() {
     let code = '';
@@ -30,6 +41,24 @@ class HookCodeFactory {
         fn = new Function(
           this.args(), // name, age
           this.header() + this.content(),
+        )
+        break;
+      case 'async':
+        fn = new Function(
+          this.args({ after: '_callback' }), // name, age, callback
+          this.header() + this.content({onDone: () => `_callback();`}),
+        )
+        break;
+      case 'promise':
+        let tabsContent = this.content({ onDone: () => `_resolve();`});
+        const content = `
+          return new Promise((function (_resolve, _reject) {
+            ${tabsContent}
+          }));
+        `;
+        fn = new Function(
+          this.args(), // name, age
+          this.header() + content,
         )
         break;
       default:
@@ -48,6 +77,20 @@ class HookCodeFactory {
     }
     return code;
   }
+  callTapsParallel({ onDone }) {
+    let { taps = [] } = this.options;
+    let code = `var _counter = ${taps.length};\n`;
+    code += `
+      var _done = (function() {
+        ${onDone()}
+      });
+    `
+    for (let i = 0; i < taps.length; i++) {
+      const tapContent = this.callTap(i);
+      code += tapContent
+    }
+    return code;
+  }
   callTap(tapIndex) {
     let code = '';
     code += `var _fn${tapIndex} = _x[${tapIndex}];\n`
@@ -55,6 +98,23 @@ class HookCodeFactory {
     switch(tapInfo.type) {
       case 'sync':
         code += `_fn${tapIndex}(${this.args()});\n`
+        break;
+      case 'async':
+        code += `
+          _fn${tapIndex}(${this.args({
+            after: `function() {
+              if (--_counter === 0) _done();
+            }`
+          })});
+        `
+        break;
+      case 'promise':
+        code += `
+          var _promise${tapIndex} = _fn${tapIndex}(${this.args()});
+          _promise${tapIndex}.then((function () {
+            if (--_counter === 0) _done();
+          }));
+        `
         break;
       default:
         break;
