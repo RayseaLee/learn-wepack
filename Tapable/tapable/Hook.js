@@ -7,6 +7,8 @@ class Hook {
     this.taps = [];
     // 此变量刚开始是没有值的，后面会设置为回调函数的数组
     this._x = undefined; // this.taps.map(item => item.fn)
+    // 拦截器
+    this.interceptors = [];
     this.call = CALL_DELEGATE;
     this.callAsync = CALL_ASYNC_DELEGATE;
     this.promise = PROMISE_DELEGATE;
@@ -36,7 +38,23 @@ class Hook {
       type,
       fn
     }
+    // 注册拦截器可以用来对tapInfo做一些修改
+    tapInfo = this._runRegisterInterceptors(tapInfo);
     this._insert(tapInfo);
+  }
+  intercept(interceptor) {
+    this.interceptors.push(interceptor);
+  }
+  _runRegisterInterceptors(tapInfo) {
+    for (const interceptor of this.interceptors) {
+      if (interceptor.register) {
+        let newTapInfo = interceptor.register(tapInfo);
+        if (newTapInfo) {
+          tapInfo = newTapInfo;
+        }
+      }
+    }
+    return tapInfo;
   }
   _insert(tapInfo) {
     this.taps.push(tapInfo);
@@ -46,9 +64,10 @@ class Hook {
   }
   _createCall(type) {
     return this.compile({
-      type, // 类型
+      type, // 类型 sync async promise
       taps: this.taps, // 回调数组
-      args: this.args // 形参数组
+      args: this.args, // 形参数组
+      interceptors: this.interceptors // 拦截器
     })
   }
 }

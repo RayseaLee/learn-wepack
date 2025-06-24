@@ -3,7 +3,7 @@ const HookCodeFactory = require('./HookCodeFactory');
 // 代码工厂
 class AsyncSeriesHookCodeFactory extends HookCodeFactory {
   content({ onDone }) {
-    return this.callTapsAsyncSeries({ onDone });
+    return this.callTapsSeries({ onDone });
   }
 }
 // 创建工厂实例
