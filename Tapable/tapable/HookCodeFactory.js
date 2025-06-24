@@ -72,9 +72,31 @@ class HookCodeFactory {
     }
     let code = '';
     for (let i = 0; i < this.options.taps.length; i++) {
-      const tapContent = this.callTap(i);
+      const tapContent = this.callTap(i, {});
       code += tapContent
     }
+    return code;
+  }
+  callTapsAsyncSeries({ onDone }) {
+    let { taps = [] } = this.options;
+    if (taps.length === 0) return onDone(); // _callback();
+    let code = '';
+    let current = onDone;
+    for (let j = taps.length - 1; j >= 0; j--) {
+      const i = j;
+      // 如果 current !== onDone, 需要包裹一下
+      const unroll = current !== onDone;
+      if(unroll) {
+        code += `function _next${i}() {\n`;
+        code += current();
+        code += `}\n`;
+        current = () => `_next${i}();`
+      }
+      const done = current;
+      const content = this.callTap(i, { onDone: done });
+      current = () => content;
+    }
+    code += current();
     return code;
   }
   callTapsParallel({ onDone }) {
@@ -91,7 +113,7 @@ class HookCodeFactory {
     }
     return code;
   }
-  callTap(tapIndex) {
+  callTap(tapIndex, { onDone }) {
     let code = '';
     code += `var _fn${tapIndex} = _x[${tapIndex}];\n`
     let tapInfo = this.options.taps[tapIndex];
@@ -100,11 +122,12 @@ class HookCodeFactory {
         code += `_fn${tapIndex}(${this.args()});\n`
         break;
       case 'async':
+        let cbCode = `function() {\n`;
+        if (onDone) cbCode += onDone(); // _callback();
+        cbCode += `}`
         code += `
           _fn${tapIndex}(${this.args({
-            after: `function() {
-              if (--_counter === 0) _done();
-            }`
+            after: cbCode
           })});
         `
         break;
