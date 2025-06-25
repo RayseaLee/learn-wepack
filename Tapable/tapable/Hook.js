@@ -57,7 +57,25 @@ class Hook {
     return tapInfo;
   }
   _insert(tapInfo) {
-    this.taps.push(tapInfo);
+    let stage = 0;
+    if (typeof tapInfo.stage === 'number') {
+      stage = tapInfo.stage;
+    }
+    let i = this.taps.length;
+    // 插入排序 按照stage升序的方式将tapInfo插入到正确的位置
+    while (i > 0) {
+      i--;
+      const compareTap = this.taps[i];
+      this.taps[i + 1] = compareTap;
+      const compareStage = compareTap.stage || 0;
+      // 如果被比较的元素的stage大于要插入的stage，继续遍历
+      if (compareStage > stage) {
+        continue;
+      }
+      i++;
+      break;
+    }
+    this.taps[i] = tapInfo;
   }
   compile(options) {
     throw new Error('子类必须实现此方法');
