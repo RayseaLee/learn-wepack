@@ -60,6 +60,12 @@ class Hook {
     let stage = 0;
     if (typeof tapInfo.stage === 'number') {
       stage = tapInfo.stage;
+    } 
+    let before;
+    if (typeof tapInfo.before === 'string') {
+      before = new Set([tapInfo.before]);
+    } else if (Array.isArray(tapInfo.before)) {
+      before = new Set(tapInfo.before);
     }
     let i = this.taps.length;
     // 插入排序 按照stage升序的方式将tapInfo插入到正确的位置
@@ -68,6 +74,15 @@ class Hook {
       const compareTap = this.taps[i];
       this.taps[i + 1] = compareTap;
       const compareStage = compareTap.stage || 0;
+      if (before) {
+        if (before.has(compareTap.name)) {
+          before.delete(compareTap.name);
+          continue;
+        }
+        if (before.size > 0) {
+          continue;
+        }
+      }
       // 如果被比较的元素的stage大于要插入的stage，继续遍历
       if (compareStage > stage) {
         continue;
